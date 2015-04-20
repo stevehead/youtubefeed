@@ -1,3 +1,14 @@
 from django.db import models
 
-# Create your models here.
+
+class YoutubeModel(models.Model):
+    class Meta:
+        abstract = True
+
+
+class Video(YoutubeModel):
+    pass
+
+
+class Channel(YoutubeModel):
+    pass
