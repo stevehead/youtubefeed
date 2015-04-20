@@ -102,6 +102,12 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 
+# Youtube v3 API Key
+# https://developers.google.com/youtube/registering_an_application
+
+YOUTUBE_API_KEY = '<your application API key>'
+
+
 # Local settings import
 try:
     from local_settings import *
