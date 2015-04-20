@@ -1,3 +1,11 @@
 from django.test import TestCase
 
-# Create your tests here.
+from .models import Video, Channel
+
+
+class VideoMethodTests(TestCase):
+    pass
+
+
+class ChannelMethodTests(TestCase):
+    pass
