@@ -11,12 +11,15 @@ class YoutubeAPIQuery:
 
     api_key = settings.YOUTUBE_API_KEY
     api_base_url = 'https://www.googleapis.com/youtube/v3/'
-    default_datetime_string = '1970-01-01T00:00:00.000Z'
 
     channel_properties = ['id', 'title', 'description', 'thumbnail', 'published_at', 'uploads_playlist_id']
     channel_url_parts = ['contentDetails', 'snippet']
     channel_url_format = api_base_url + 'channels?part=' + ','.join(channel_url_parts) + '&id=%s&key=' + api_key
     user_url_format = api_base_url + 'channels?part=' + ','.join(channel_url_parts) + '&forUsername=%s&key=' + api_key
+
+    playlist_properties = ['id', 'title', 'description', 'thumbnail', 'published_at', 'channel_id', 'video_count']
+    playlist_url_parts = ['contentDetails', 'snippet']
+    playlist_url_format = api_base_url + 'playlists?part=' + ','.join(channel_url_parts) + '&id=%s&key=' + api_key
 
     video_properties = ['id', 'title', 'description', 'thumbnail', 'published_at', 'channel_id', 'duration']
     video_url_parts = ['contentDetails', 'snippet']
@@ -59,9 +62,24 @@ class YoutubeAPIQuery:
             channel['title'] = channel_item['snippet']['title']
             channel['description'] = channel_item['snippet']['description']
             channel['thumbnail'] = channel_item['snippet']['thumbnails']['default']['url']
-            channel['published_at'] = channel_item['snippet'].get('publishedAt', cls.default_datetime_string)
+            channel['published_at'] = channel_item['snippet']['publishedAt']
             channel['uploads_playlist_id'] = channel_item['contentDetails']['relatedPlaylists']['uploads']
             return channel
+        except Exception as e:
+            raise YoutubeAPIQueryError("JSON parsing failed: %s" % e)
+
+    @classmethod
+    def parse_playlist_results(cls, playlist_item):
+        try:
+            playlist = dict()
+            playlist['id'] = playlist_item['id']
+            playlist['channel_id'] = playlist_item['snippet']['channelId']
+            playlist['title'] = playlist_item['snippet']['title']
+            playlist['description'] = playlist_item['snippet']['description']
+            playlist['thumbnail'] = playlist_item['snippet']['thumbnails']['default']['url']
+            playlist['published_at'] = playlist_item['snippet']['publishedAt']
+            playlist['video_count'] = playlist_item['contentDetails']['itemCount']
+            return playlist
         except Exception as e:
             raise YoutubeAPIQueryError("JSON parsing failed: %s" % e)
 
@@ -91,6 +109,12 @@ class YoutubeAPIQuery:
         query = cls.user_url_format % username
         channel_item = cls.query_youtube(query, True)
         return cls.parse_channel_results(channel_item)
+
+    @classmethod
+    def get_playlist(cls, playlist_id):
+        query = cls.playlist_url_format % playlist_id
+        playlist_item = cls.query_youtube(query, True)
+        return cls.parse_playlist_results(playlist_item)
 
     @classmethod
     def get_video(cls, video_id):
