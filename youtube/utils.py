@@ -146,7 +146,7 @@ class YoutubeAPIQuery:
         return cls.parse_channel_results(channel_item)
 
     @classmethod
-    def get_channel_from_username(cls, username):
+    def get_user(cls, username):
         query = cls.user_url_format % username
         channel_item = cls.query_youtube(query, True)
         return cls.parse_channel_results(channel_item)
