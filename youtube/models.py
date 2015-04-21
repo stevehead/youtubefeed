@@ -14,7 +14,7 @@ class YoutubeModel(BaseModel):
 
 class Channel(YoutubeModel):
     channel_id = models.TextField(unique=True)
-    uploads_playlist_id = models.TextField
+    uploads_playlist_id = models.TextField()
 
 
 class Video(YoutubeModel):
