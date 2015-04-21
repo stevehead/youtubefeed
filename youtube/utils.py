@@ -20,6 +20,7 @@ class YoutubeAPIQuery:
     playlist_properties = ['id', 'title', 'description', 'thumbnail', 'published_at', 'channel_id', 'video_count']
     playlist_url_parts = ['contentDetails', 'snippet']
     playlist_url_format = api_base_url + 'playlists?part=' + ','.join(channel_url_parts) + '&id=%s&key=' + api_key
+    playlist_from_channel_url_format = api_base_url + 'playlists?part=' + ','.join(channel_url_parts) + '&channelId=%s&key=' + api_key
 
     playlistitem_properties = ['id', 'title', 'description', 'thumbnail', 'published_at', 'channel_id', 'duration']
     playlistitem_url_parts = ['snippet']
@@ -146,16 +147,41 @@ class YoutubeAPIQuery:
         return cls.parse_channel_results(channel_item)
 
     @classmethod
+    def get_channel_playlists(cls, channel_id):
+        query = cls.playlist_from_channel_url_format % channel_id
+        return cls.multi_query_youtube(query, cls.parse_playlist_results)
+
+    @classmethod
+    def get_channel_videos(cls, channel_id):
+        channel = cls.get_channel(channel_id)
+        return cls.get_playlist_videos(channel['uploads_playlist_id'])
+
+    @classmethod
     def get_user(cls, username):
         query = cls.user_url_format % username
         channel_item = cls.query_youtube(query, True)
         return cls.parse_channel_results(channel_item)
 
     @classmethod
+    def get_user_playlists(cls, username):
+        channel = cls.get_user(username)
+        return cls.get_channel_playlists(channel['id'])
+
+    @classmethod
+    def get_user_videos(cls, username):
+        user = cls.get_user(username)
+        return cls.get_playlist_videos(user['uploads_playlist_id'])
+
+    @classmethod
     def get_playlist(cls, playlist_id):
         query = cls.playlist_url_format % playlist_id
         playlist_item = cls.query_youtube(query, True)
         return cls.parse_playlist_results(playlist_item)
+
+    @classmethod
+    def get_playlist_channel(cls, playlist_id):
+        playlist = cls.get_playlist(playlist_id)
+        return cls.get_channel(playlist['channel_id'])
 
     @classmethod
     def get_playlist_videos(cls, playlist_id):
@@ -167,6 +193,11 @@ class YoutubeAPIQuery:
         query = cls.video_url_format % video_id
         video_item = cls.query_youtube(query, True)
         return cls.parse_video_results(video_item)
+
+    @classmethod
+    def get_video_channel(cls, video_id):
+        video = cls.get_video(video_id)
+        return cls.get_channel(video['channel_id'])
 
 
 class YoutubeAPIQueryError(Exception):

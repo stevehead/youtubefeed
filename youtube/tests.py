@@ -17,6 +17,7 @@ class YoutubeAPIQueryTests(TestCase):
         cls.test_playlist = YoutubeAPIQuery.get_playlist(cls.test_playlist_id)
         cls.test_video = YoutubeAPIQuery.get_video(cls.test_video_id)
         cls.test_playlist_videos = YoutubeAPIQuery.get_playlist_videos(cls.test_playlist_id)
+        cls.test_channel_playlists = YoutubeAPIQuery.get_channel_playlists(cls.test_channel_id)
 
     def test_query_youtube_channel_from_username(self):
         query = YoutubeAPIQuery.user_url_format % self.test_username_id
@@ -43,9 +44,13 @@ class YoutubeAPIQueryTests(TestCase):
         video = YoutubeAPIQuery.query_youtube(query, True)
         self.assertEqual(video['kind'], 'youtube#video')
 
-    def test_get_channel_from_username(self):
+    def test_get_channel(self):
         for key in YoutubeAPIQuery.channel_properties:
             self.assertIn(key, self.test_channel)
+
+    def test_get_channel_playlists(self):
+        for key in YoutubeAPIQuery.playlist_properties:
+            self.assertIn(key, self.test_channel_playlists[0])
 
     def test_get_playlist(self):
         for key in YoutubeAPIQuery.playlist_properties:
