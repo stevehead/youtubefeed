@@ -23,7 +23,7 @@ class YoutubeAPIQuery:
 
     playlistitem_properties = ['id', 'title', 'description', 'thumbnail', 'published_at', 'channel_id', 'duration']
     playlistitem_url_parts = ['snippet']
-    playlistitem_url_format = api_base_url + 'playlistItems?part=' + ','.join(playlistitem_url_parts) + '&playlistId=%s&maxResults=50&key=' + api_key
+    playlistitem_url_format = api_base_url + 'playlistItems?part=' + ','.join(playlistitem_url_parts) + '&playlistId=%s&key=' + api_key
 
     video_properties = ['id', 'title', 'description', 'thumbnail', 'published_at', 'channel_id', 'duration']
     video_url_parts = ['contentDetails', 'snippet']
@@ -57,6 +57,28 @@ class YoutubeAPIQuery:
         # Else return everything
         else:
             return json_response
+
+    @classmethod
+    def multi_query_youtube(cls, query, parse_method=None):
+        main_query = query + '&maxResults=50'
+        all_items = []
+        pageToken = None
+        while True:
+            if pageToken:
+                this_query = main_query + '&pageToken=' + pageToken
+            else:
+                this_query = main_query
+            query_results = cls.query_youtube(query=this_query, requires_one_response=False)
+            for result in query_results['items']:
+                if parse_method:
+                    all_items.append(parse_method(result))
+                else:
+                    all_items.append(result)
+            if 'nextPageToken' in query_results:
+                pageToken = query_results['nextPageToken']
+            else:
+                break
+        return all_items
 
     @classmethod
     def parse_channel_results(cls, channel_item):
@@ -137,22 +159,8 @@ class YoutubeAPIQuery:
 
     @classmethod
     def get_playlist_videos(cls, playlist_id):
-        playlist_videos = []
-        main_query = cls.playlistitem_url_format % playlist_id
-        pageToken = None
-        while True:
-            if pageToken:
-                this_query = main_query + '&pageToken=' +pageToken
-            else:
-                this_query = main_query
-            playlistitems_results = cls.query_youtube(this_query)
-            for result in playlistitems_results['items']:
-                playlist_videos.append(cls.parse_playlistitem_results(result))
-            if 'nextPageToken' in playlistitems_results:
-                pageToken = playlistitems_results['nextPageToken']
-            else:
-                break
-        return playlist_videos
+        query = cls.playlistitem_url_format % playlist_id
+        return cls.multi_query_youtube(query, cls.parse_playlistitem_results)
 
     @classmethod
     def get_video(cls, video_id):
