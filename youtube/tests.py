@@ -5,30 +5,36 @@ from .utils import YoutubeAPIQuery
 
 
 class YoutubeAPIQueryTests(TestCase):
+    test_channel_id = 'UCFKDEp9si4RmHFWJW1vYsMA'
+    test_username_id = 'ethoslab'
+    test_playlist_id = 'PLVPJ1jbg0CaEsRhyNmZy7PMSl9eb4PSg1'
+    test_video_id = 'rdwz7QiG0lk'
+
     @classmethod
     def setUpClass(cls):
         super(YoutubeAPIQueryTests, cls).setUpClass()
-        cls.test_channel = YoutubeAPIQuery.get_channel('UCFKDEp9si4RmHFWJW1vYsMA')
-        cls.test_playlist = YoutubeAPIQuery.get_playlist('PLVPJ1jbg0CaGL_uKV3IP-V6OFk_rQDZCl')
-        cls.test_video = YoutubeAPIQuery.get_video('rdwz7QiG0lk')
+        cls.test_channel = YoutubeAPIQuery.get_channel(cls.test_channel_id)
+        cls.test_playlist = YoutubeAPIQuery.get_playlist(cls.test_playlist_id)
+        cls.test_video = YoutubeAPIQuery.get_video(cls.test_video_id)
+        cls.test_playlist_videos = YoutubeAPIQuery.get_playlist_videos(cls.test_playlist_id)
 
     def test_query_youtube_channel_from_username(self):
-        query = YoutubeAPIQuery.user_url_format % 'youtube'
+        query = YoutubeAPIQuery.user_url_format % self.test_username_id
         channel = YoutubeAPIQuery.query_youtube(query, True)
         self.assertEqual(channel['kind'], 'youtube#channel')
 
     def test_query_youtube_channel_from_id(self):
-        query = YoutubeAPIQuery.channel_url_format % 'UCJTWU5K7kl9EE109HBeoldA'
+        query = YoutubeAPIQuery.channel_url_format % self.test_channel_id
         channel = YoutubeAPIQuery.query_youtube(query, True)
         self.assertEqual(channel['kind'], 'youtube#channel')
 
     def test_query_youtube_playlist(self):
-        query = YoutubeAPIQuery.playlist_url_format % 'PLFx-KViPXIkEfy1vrFoCepbtDemog0BjE'
+        query = YoutubeAPIQuery.playlist_url_format % self.test_playlist_id
         playlist = YoutubeAPIQuery.query_youtube(query, True)
         self.assertEqual(playlist['kind'], 'youtube#playlist')
 
     def test_query_youtube_video(self):
-        query = YoutubeAPIQuery.video_url_format % 'cBxhbQ4TlDk'
+        query = YoutubeAPIQuery.video_url_format % self.test_video_id
         video = YoutubeAPIQuery.query_youtube(query, True)
         self.assertEqual(video['kind'], 'youtube#video')
 
@@ -39,6 +45,11 @@ class YoutubeAPIQueryTests(TestCase):
     def test_get_playlist(self):
         for key in YoutubeAPIQuery.playlist_properties:
             self.assertIn(key, self.test_playlist)
+
+    def test_get_playlist_videos(self):
+        self.assertEqual(len(self.test_playlist_videos), self.test_playlist['video_count'])
+        for key in YoutubeAPIQuery.playlistitem_properties:
+            self.assertIn(key, self.test_playlist_videos[0])
 
     def test_get_video(self):
         for key in YoutubeAPIQuery.video_properties:
