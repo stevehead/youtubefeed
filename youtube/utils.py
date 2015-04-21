@@ -14,8 +14,13 @@ class YoutubeAPIQuery:
     default_datetime_string = '1970-01-01T00:00:00.000Z'
 
     channel_properties = ['id', 'title', 'description', 'thumbnail', 'published_at', 'uploads_playlist_id']
-    channel_url_parts = ['contentDetails', 'snippet', 'statistics']
+    channel_url_parts = ['contentDetails', 'snippet']
+    channel_url_format = api_base_url + 'channels?part=' + ','.join(channel_url_parts) + '&id=%s&key=' + api_key
     user_url_format = api_base_url + 'channels?part=' + ','.join(channel_url_parts) + '&forUsername=%s&key=' + api_key
+
+    video_properties = ['id', 'title', 'description', 'thumbnail', 'published_at', 'channel_id', 'duration']
+    video_url_parts = ['contentDetails', 'snippet']
+    video_url_format = api_base_url + 'videos?part=' + ','.join(video_url_parts) + '&id=%s&key=' + api_key
 
     @abstractmethod
     def __init__(self):
@@ -48,9 +53,8 @@ class YoutubeAPIQuery:
 
     @classmethod
     def parse_channel_results(cls, channel_item):
-        channel = dict()
-
         try:
+            channel = dict()
             channel['id'] = channel_item['id']
             channel['title'] = channel_item['snippet']['title']
             channel['description'] = channel_item['snippet']['description']
@@ -62,10 +66,37 @@ class YoutubeAPIQuery:
             raise YoutubeAPIQueryError("JSON parsing failed: %s" % e)
 
     @classmethod
+    def parse_video_results(cls, video_item):
+        try:
+            video = dict()
+            video['id'] = video_item['id']
+            video['channel_id'] = video_item['snippet']['channelId']
+            video['title'] = video_item['snippet']['title']
+            video['description'] = video_item['snippet']['description']
+            video['thumbnail'] = video_item['snippet']['thumbnails']['default']['url']
+            video['published_at'] = video_item['snippet']['publishedAt']
+            video['duration'] = video_item['contentDetails']['duration']
+            return video
+        except Exception as e:
+            raise YoutubeAPIQueryError("JSON parsing failed: %s" % e)
+
+    @classmethod
+    def get_channel(cls, channel_id):
+        query = cls.channel_url_format % channel_id
+        channel_item = cls.query_youtube(query, True)
+        return cls.parse_channel_results(channel_item)
+
+    @classmethod
     def get_channel_from_username(cls, username):
         query = cls.user_url_format % username
         channel_item = cls.query_youtube(query, True)
         return cls.parse_channel_results(channel_item)
+
+    @classmethod
+    def get_video(cls, video_id):
+        query = cls.video_url_format % video_id
+        video_item = cls.query_youtube(query, True)
+        return cls.parse_video_results(video_item)
 
 
 class YoutubeAPIQueryError(Exception):
