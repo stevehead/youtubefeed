@@ -1,3 +1,4 @@
+import unittest
 from django.test import TestCase
 
 from .models import YoutubeModel, Video, Channel
@@ -9,7 +10,7 @@ test_username_id = 'ethoslab'
 test_playlist_id = 'PLVPJ1jbg0CaEsRhyNmZy7PMSl9eb4PSg1'
 test_video_id = 'rdwz7QiG0lk'
 
-
+@unittest.skip("To speed up testing of the models.")
 class YoutubeAPIQueryTests(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -72,8 +73,11 @@ class YoutubeModelTests(TestCase):
 
 
 class VideoMethodTests(TestCase):
-    pass
-
+    def test_create_video_from_web(self):
+        test_video = Video.create_from_web(test_video_id)
+        test_video.save()
 
 class ChannelMethodTests(TestCase):
-    pass
+    def test_create_channel_from_web(self):
+        test_channel = Channel.create_from_web(test_channel_id)
+        test_channel.save()
