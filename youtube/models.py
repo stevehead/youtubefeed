@@ -5,7 +5,7 @@ from common.models import BaseModel
 class YoutubeModel(BaseModel):
     title = models.TextField()
     description = models.TextField()
-    thumbnail = models.UrlField()
+    thumbnail = models.URLField()
     published_at = models.DateTimeField('publish time')
 
     class Meta:
