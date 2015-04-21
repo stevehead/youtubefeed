@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class YoutubeModel(models.Model):
+class YoutubeModel:
     class Meta:
         abstract = True
 
