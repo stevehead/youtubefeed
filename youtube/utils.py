@@ -81,22 +81,25 @@ class YoutubeAPIQuery:
                 break
         return all_items
 
-    @classmethod
-    def parse_channel_results(cls, channel_item):
+    @staticmethod
+    def parse_channel_results(channel_item):
         try:
             channel = dict()
             channel['id'] = channel_item['id']
             channel['title'] = channel_item['snippet']['title']
             channel['description'] = channel_item['snippet']['description']
             channel['thumbnail'] = channel_item['snippet']['thumbnails']['default']['url']
-            channel['published_at'] = channel_item['snippet']['publishedAt']
+            try:
+                channel['published_at'] = channel_item['snippet']['publishedAt']
+            except KeyError:
+                channel['published_at'] = None
             channel['uploads_playlist_id'] = channel_item['contentDetails']['relatedPlaylists']['uploads']
             return channel
         except Exception as e:
             raise YoutubeAPIQueryError("JSON parsing failed: %s" % e)
 
-    @classmethod
-    def parse_playlist_results(cls, playlist_item):
+    @staticmethod
+    def parse_playlist_results(playlist_item):
         try:
             playlist = dict()
             playlist['id'] = playlist_item['id']
@@ -104,14 +107,17 @@ class YoutubeAPIQuery:
             playlist['title'] = playlist_item['snippet']['title']
             playlist['description'] = playlist_item['snippet']['description']
             playlist['thumbnail'] = playlist_item['snippet']['thumbnails']['default']['url']
-            playlist['published_at'] = playlist_item['snippet']['publishedAt']
+            try:
+                playlist['published_at'] = playlist_item['snippet']['publishedAt']
+            except KeyError:
+                playlist['published_at'] = None
             playlist['video_count'] = playlist_item['contentDetails']['itemCount']
             return playlist
         except Exception as e:
             raise YoutubeAPIQueryError("JSON parsing failed: %s" % e)
 
-    @classmethod
-    def parse_playlistitem_results(cls, video_item):
+    @staticmethod
+    def parse_playlistitem_results(video_item):
         try:
             video = dict()
             video['id'] = video_item['snippet']['resourceId']['videoId']
@@ -119,14 +125,17 @@ class YoutubeAPIQuery:
             video['title'] = video_item['snippet']['title']
             video['description'] = video_item['snippet']['description']
             video['thumbnail'] = video_item['snippet']['thumbnails']['default']['url']
-            video['published_at'] = video_item['snippet']['publishedAt']
+            try:
+                video['published_at'] = video_item['snippet']['publishedAt']
+            except KeyError:
+                video['published_at'] = None
             video['duration'] = None
             return video
         except Exception as e:
             raise YoutubeAPIQueryError("JSON parsing failed: %s" % e)
 
-    @classmethod
-    def parse_video_results(cls, video_item):
+    @staticmethod
+    def parse_video_results(video_item):
         try:
             video = dict()
             video['id'] = video_item['id']
@@ -134,7 +143,10 @@ class YoutubeAPIQuery:
             video['title'] = video_item['snippet']['title']
             video['description'] = video_item['snippet']['description']
             video['thumbnail'] = video_item['snippet']['thumbnails']['default']['url']
-            video['published_at'] = video_item['snippet']['publishedAt']
+            try:
+                video['published_at'] = video_item['snippet']['publishedAt']
+            except KeyError:
+                video['published_at'] = None
             video['duration'] = video_item['contentDetails']['duration']
             return video
         except Exception as e:
