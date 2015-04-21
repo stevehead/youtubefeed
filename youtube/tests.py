@@ -33,6 +33,11 @@ class YoutubeAPIQueryTests(TestCase):
         playlist = YoutubeAPIQuery.query_youtube(query, True)
         self.assertEqual(playlist['kind'], 'youtube#playlist')
 
+    def test_query_youtube_playlistitem(self):
+        query = YoutubeAPIQuery.playlistitem_url_format % self.test_playlist_id
+        playlistitem = YoutubeAPIQuery.query_youtube(query, False)
+        self.assertEqual(playlistitem['items'][0]['kind'], 'youtube#playlistItem')
+
     def test_query_youtube_video(self):
         query = YoutubeAPIQuery.video_url_format % self.test_video_id
         video = YoutubeAPIQuery.query_youtube(query, True)
