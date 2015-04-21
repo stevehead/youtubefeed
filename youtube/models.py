@@ -17,6 +17,14 @@ class Channel(YoutubeModel):
     uploads_playlist_id = models.TextField()
 
 
-class Video(YoutubeModel):
+class VideoModel(YoutubeModel):
+    channel = models.ForeignKey(Channel)
+    video_id = models.TextField(unique=True)
+
+    class Meta:
+        abstract = True
+
+
+class Video(VideoModel):
     channel = models.ForeignKey(Channel)
     video_id = models.TextField(unique=True)
