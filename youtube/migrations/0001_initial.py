@@ -40,7 +40,7 @@ class Migration(migrations.Migration):
                 ('thumbnail', models.URLField()),
                 ('published_at', models.DateTimeField(verbose_name=b'publish time')),
                 ('video_id', models.TextField(unique=True)),
-                ('channel', models.ForeignKey(to='youtube.Channel')),
+                ('channel', models.ForeignKey(related_name='videos', to='youtube.Channel')),
             ],
             options={
                 'abstract': False,

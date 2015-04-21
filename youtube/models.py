@@ -12,19 +12,17 @@ class YoutubeModel(BaseModel):
         abstract = True
 
 
-class Channel(YoutubeModel):
-    channel_id = models.TextField(unique=True)
-    uploads_playlist_id = models.TextField()
-
-
 class VideoModel(YoutubeModel):
-    channel = models.ForeignKey(Channel)
     video_id = models.TextField(unique=True)
 
     class Meta:
         abstract = True
 
 
+class Channel(YoutubeModel):
+    channel_id = models.TextField(unique=True)
+    uploads_playlist_id = models.TextField()
+
+
 class Video(VideoModel):
-    channel = models.ForeignKey(Channel)
-    video_id = models.TextField(unique=True)
+    channel = models.ForeignKey(Channel, related_name='videos')
