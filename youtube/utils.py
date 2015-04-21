@@ -22,9 +22,9 @@ class YoutubeAPIQuery:
     playlist_url_format = api_base_url + 'playlists?part=' + ','.join(channel_url_parts) + '&id=%s&key=' + api_key
     playlist_from_channel_url_format = api_base_url + 'playlists?part=' + ','.join(channel_url_parts) + '&channelId=%s&key=' + api_key
 
-    playlistitem_properties = ['id', 'title', 'description', 'thumbnail', 'published_at', 'channel_id', 'duration']
-    playlistitem_url_parts = ['snippet']
-    playlistitem_url_format = api_base_url + 'playlistItems?part=' + ','.join(playlistitem_url_parts) + '&playlistId=%s&key=' + api_key
+    playlist_video_properties = ['id', 'title', 'description', 'thumbnail', 'published_at', 'channel_id', 'duration']
+    playlist_video_url_parts = ['snippet']
+    playlist_video_url_format = api_base_url + 'playlistItems?part=' + ','.join(playlist_video_url_parts) + '&playlistId=%s&key=' + api_key
 
     video_properties = ['id', 'title', 'description', 'thumbnail', 'published_at', 'channel_id', 'duration']
     video_url_parts = ['contentDetails', 'snippet']
@@ -117,7 +117,7 @@ class YoutubeAPIQuery:
             raise YoutubeAPIQueryError("JSON parsing failed: %s" % e)
 
     @staticmethod
-    def parse_playlistitem_results(video_item):
+    def parse_playlist_video_results(video_item):
         try:
             video = dict()
             video['id'] = video_item['snippet']['resourceId']['videoId']
@@ -197,8 +197,8 @@ class YoutubeAPIQuery:
 
     @classmethod
     def get_playlist_videos(cls, playlist_id):
-        query = cls.playlistitem_url_format % playlist_id
-        return cls.multi_query_youtube(query, cls.parse_playlistitem_results)
+        query = cls.playlist_video_url_format % playlist_id
+        return cls.multi_query_youtube(query, cls.parse_playlist_video_results)
 
     @classmethod
     def get_video(cls, video_id):
