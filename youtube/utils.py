@@ -13,8 +13,7 @@ class YoutubeAPIQuery:
     api_base_url = 'https://www.googleapis.com/youtube/v3/'
     default_datetime_string = '1970-01-01T00:00:00.000Z'
 
-    channel_properties = ['id', 'title', 'description', 'thumbnail', 'published_at', 'uploads_playlist_id',
-        'video_count']
+    channel_properties = ['id', 'title', 'description', 'thumbnail', 'published_at', 'uploads_playlist_id']
     channel_url_parts = ['contentDetails', 'snippet', 'statistics']
     user_url_format = api_base_url + 'channels?part=' + ','.join(channel_url_parts) + '&forUsername=%s&key=' + api_key
 
@@ -58,7 +57,6 @@ class YoutubeAPIQuery:
             channel['thumbnail'] = channel_item['snippet']['thumbnails']['default']['url']
             channel['published_at'] = channel_item['snippet'].get('publishedAt', cls.default_datetime_string)
             channel['uploads_playlist_id'] = channel_item['contentDetails']['relatedPlaylists']['uploads']
-            channel['video_count'] = channel_item['statistics']['videoCount']
             return channel
         except Exception as e:
             raise YoutubeAPIQueryError("JSON parsing failed: %s" % e)
