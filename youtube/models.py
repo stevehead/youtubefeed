@@ -71,6 +71,7 @@ class Channel(YoutubeModel):
 
 class Video(VideoModel):
     channel = models.ForeignKey(Channel, related_name='videos')
+    duration = models.IntegerField()
 
     def save(self, *args, **kwargs):
         try:
