@@ -65,7 +65,7 @@ class VideoViewing(BaseModel):
 
 
 class FeedChannel(BaseModel):
-    channel = models.ForeignKey(Channel, unique=True, related_name='+')
+    channel = models.OneToOneField(Channel, primary_key=True)
 
 
 class FeedVideo(VideoModel):

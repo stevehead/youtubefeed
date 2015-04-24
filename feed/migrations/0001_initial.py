@@ -14,11 +14,10 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='FeedChannel',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('is_active', models.BooleanField(default=True)),
                 ('record_created_at', models.DateTimeField(auto_now_add=True, verbose_name=b'record creation time')),
                 ('record_updated_at', models.DateTimeField(auto_now=True, verbose_name=b'record update time')),
-                ('channel', models.ForeignKey(related_name='+', to='youtube.Channel', unique=True)),
+                ('channel', models.OneToOneField(primary_key=True, serialize=False, to='youtube.Channel')),
             ],
             options={
                 'abstract': False,
