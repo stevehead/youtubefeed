@@ -1,8 +1,8 @@
 import iso8601
-import re
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from common.models import BaseModel
+from common.utils import convert_iso8601_duration_to_seconds
 from .utils import YoutubeAPIQuery
 
 
@@ -28,12 +28,8 @@ class YoutubeModel(BaseModel):
         for key, value in info.iteritems():
             setattr(self, key, value)
 
-    @staticmethod
-    def convert_duration_string_to_seconds(duration):
-        regex_search = re.search(r'PT(\d)M(\d)S', duration)
-        seconds = int(regex_search.group(1)) * 60
-        seconds += int(regex_search.group(2))
-        return seconds
+    def __unicode__(self):
+        return self.title
 
     class Meta:
         abstract = True
@@ -83,7 +79,7 @@ class Video(VideoModel):
     @classmethod
     def clean_info(cls, info):
         info = super(Video, cls).clean_info(info)
-        info['duration'] = cls.convert_duration_string_to_seconds(info['duration'])
+        info['duration'] = convert_iso8601_duration_to_seconds(info['duration'])
         return info
 
     @classmethod

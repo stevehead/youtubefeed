@@ -2,7 +2,8 @@ import unittest
 from django.conf import settings
 from django.test import TestCase
 
-from .models import YoutubeModel, Video, Channel
+from common.utils import convert_iso8601_duration_to_seconds
+from .models import Video, Channel
 from .utils import YoutubeAPIQuery
 
 
@@ -75,6 +76,22 @@ class YoutubeAPIQueryTests(TestCase):
         query = YoutubeAPIQuery.playlist_video_url_format % test_playlist_id
         results = YoutubeAPIQuery.multi_query_youtube(query=query, limit=limit)
         self.assertEqual(len(results), limit)
+
+
+class CoomonUtilitiesTests(TestCase):
+    def test_convert_iso8601_duration_to_seconds(self):
+        tests = [
+            {'string': 'PT5M6S', 'value': 5 * 60 + 6},                      # MS
+            {'string': 'PT10M', 'value': 10 * 60},                          # M
+            {'string': 'PT14S', 'value': 14},                               # S
+            {'string': 'PT3H', 'value': 3 * 3600},                          # H
+            {'string': 'PT5H38M', 'value': 5 * 3600 + 38 * 60},             # HM
+            {'string': 'PT12H7S', 'value': 12 * 3600 + 7},                  # HS
+            {'string': 'PT8H12M56S', 'value': 8 * 3600 + 12 * 60 + 56},     # HMS
+        ]
+        for test in tests:
+            test_method_value = convert_iso8601_duration_to_seconds(test['string'])
+            self.assertEqual(test_method_value, test['value'])
 
 
 class VideoMethodTests(TestCase):
