@@ -9,23 +9,28 @@ class ShowType(BaseModel):
 
     maximum_name_color_value = int('0xFFFFFF', 0)
 
+    def save(self, *args, **kwargs):
+        if self.name_color > self.maximum_name_color_value:
+            raise AttributeError("The current name color value is outside the allowed hexadecimal range")
+        super(ShowType, self).save(*args, **kwargs)
+
     @property
     def name_hex_color(self):
         if self.name_color > self.maximum_name_color_value:
             raise AttributeError("The current name color value is outside the allowed hexadecimal range")
-        hex = hex(self.name_color)
-        hex = hex[2:]
-        hex = '0' * (6 - len(hex)) + hex.capitalize()
-        return hex
+        hex_string = hex(self.name_color)
+        hex_string = hex_string[2:]
+        hex_string = '#' + '0' * (6 - len(hex_string)) + hex_string.capitalize()
+        return hex_string
 
     @name_hex_color.setter
     def name_hex_color(self, value):
         if value[0] == '#':
             value = '0x' + value[1:]
-        decimal_value = int(value)
+        decimal_value = int(value, 16)
         if decimal_value > self.maximum_name_color_value:
             raise AttributeError("The current name color value is outside the allowed hexadecimal range")
-        return decimal_value
+        self.name_color = decimal_value
 
 
 class Show(BaseModel):
