@@ -67,9 +67,11 @@ class YoutubeAPIQueryTests(TestCase):
         for key in YoutubeAPIQuery.video_properties:
             self.assertIn(key, self.test_video)
 
-
-class YoutubeModelTests(TestCase):
-    pass
+    def test_multi_query_youtube_with_limit(self):
+        limit = 17
+        query = YoutubeAPIQuery.playlist_video_url_format % test_playlist_id
+        results = YoutubeAPIQuery.multi_query_youtube(query=query, limit=limit)
+        self.assertEqual(len(results), limit)
 
 
 class VideoMethodTests(TestCase):
