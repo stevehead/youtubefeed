@@ -11,10 +11,14 @@ class YoutubeModel(BaseModel):
     thumbnail = models.URLField()
     published_at = models.DateTimeField('publish time')
 
+    default_timestamp = iso8601.parse_date('2000-01-01T00:00:00.000Z')
+
     @classmethod
     def convert_timestamp_strings(cls, info):
-        if 'published_at' in info:
+        if 'published_at' in info and info['published_at'] is not None:
             info['published_at'] = iso8601.parse_date(info['published_at'])
+        else:
+            info['published_at'] = cls.default_timestamp
         return info
 
     def set_info_from_youtube(self, info):
