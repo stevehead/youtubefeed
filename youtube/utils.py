@@ -60,7 +60,9 @@ class YoutubeAPIQuery:
             return json_response
 
     @classmethod
-    def multi_query_youtube(cls, query, parse_method=None):
+    def multi_query_youtube(cls, query, parse_method=None, limit=None):
+        if limit is not None:
+            limit = min(limit, 50)
         main_query = query + '&maxResults=50'
         all_items = []
         pageToken = None
@@ -79,7 +81,12 @@ class YoutubeAPIQuery:
                 pageToken = query_results['nextPageToken']
             else:
                 break
-        return all_items
+            if limit is not None and len(all_items) >= limit:
+                break
+        if limit is None:
+            return all_items
+        else:
+            return all_items[:limit]
 
     @staticmethod
     def parse_channel_results(channel_item):
