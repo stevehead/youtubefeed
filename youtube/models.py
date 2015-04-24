@@ -1,4 +1,5 @@
 import iso8601
+import re
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from common.models import BaseModel
@@ -11,10 +12,11 @@ class YoutubeModel(BaseModel):
     thumbnail = models.URLField()
     published_at = models.DateTimeField('publish time')
 
+    default_duration = 0
     default_timestamp = iso8601.parse_date('2000-01-01T00:00:00.000Z')
 
     @classmethod
-    def convert_timestamp_strings(cls, info):
+    def clean_info(cls, info):
         if 'published_at' in info and info['published_at'] is not None:
             info['published_at'] = iso8601.parse_date(info['published_at'])
         else:
@@ -22,9 +24,16 @@ class YoutubeModel(BaseModel):
         return info
 
     def set_info_from_youtube(self, info):
-        info = self.convert_timestamp_strings(info)
+        info = self.clean_info(info)
         for key, value in info.iteritems():
             setattr(self, key, value)
+
+    @staticmethod
+    def convert_duration_string_to_seconds(duration):
+        regex_search = re.search('PT(\d)M(\d)S', duration)
+        seconds = int(regex_search.group(1)) * 60
+        seconds += int(regex_search.group(2))
+        return seconds
 
     class Meta:
         abstract = True
@@ -69,6 +78,12 @@ class Video(VideoModel):
         except ObjectDoesNotExist:
             Channel.create_from_youtube(channel_id=self.channel_id)
         super(VideoModel, self).save(*args, **kwargs)
+
+    @classmethod
+    def clean_info(cls, info):
+        info = VideoModel.clean_info(info)
+        info['duration'] = cls.convert_duration_string_to_seconds(info['duration'])
+        return info
 
     @classmethod
     def create_from_youtube(cls, video_id):
