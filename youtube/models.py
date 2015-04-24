@@ -1,7 +1,9 @@
 import iso8601
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from common.models import BaseModel
 from .utils import YoutubeAPIQuery
+
 
 class YoutubeModel(BaseModel):
     title = models.TextField()
@@ -15,7 +17,7 @@ class YoutubeModel(BaseModel):
             info['published_at'] = iso8601.parse_date(info['published_at'])
         return info
 
-    def update_info_from_youtube(self, info):
+    def set_info_from_youtube(self, info):
         info = self.convert_timestamp_strings(info)
         for key, value in info.iteritems():
             setattr(self, key, value)
@@ -26,7 +28,6 @@ class YoutubeModel(BaseModel):
 
 class VideoModel(YoutubeModel):
     id = models.CharField(primary_key=True, max_length=11)
-    video_id = models.TextField(unique=True)
 
     class Meta:
         abstract = True
@@ -45,16 +46,35 @@ class Channel(YoutubeModel):
         else:
             channel_info = YoutubeAPIQuery.get_channel(channel_id)
         channel = cls()
-        channel.update_info_from_youtube(channel_info)
+        channel.set_info_from_youtube(channel_info)
+        channel.save()
         return channel
+
+    def update_from_youtube(self):
+        channel_info = YoutubeAPIQuery.get_channel(self.pk)
+        self.set_info_from_youtube(channel_info)
+        self.save()
 
 
 class Video(VideoModel):
     channel = models.ForeignKey(Channel, related_name='videos')
 
+    def save(self, *args, **kwargs):
+        try:
+            Channel.objects.get(pk=self.channel_id)
+        except ObjectDoesNotExist:
+            Channel.create_from_youtube(channel_id=self.channel_id)
+        super(VideoModel, self).save(*args, **kwargs)
+
     @classmethod
     def create_from_youtube(cls, video_id):
         video_info = YoutubeAPIQuery.get_video(video_id)
         video = cls()
-        video.update_info_from_youtube(video_info)
+        video.set_info_from_youtube(video_info)
+        video.save()
         return video
+
+    def update_from_youtube(self):
+        video_info = YoutubeAPIQuery.get_video(self.pk)
+        self.set_info_from_youtube(video_info)
+        self.save()

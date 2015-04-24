@@ -38,7 +38,6 @@ class Migration(migrations.Migration):
                 ('thumbnail', models.URLField()),
                 ('published_at', models.DateTimeField(verbose_name=b'publish time')),
                 ('id', models.CharField(max_length=11, serialize=False, primary_key=True)),
-                ('video_id', models.TextField(unique=True)),
                 ('channel', models.ForeignKey(related_name='videos', to='youtube.Channel')),
             ],
             options={
