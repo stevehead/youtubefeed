@@ -13,7 +13,6 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Channel',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('is_active', models.BooleanField(default=True)),
                 ('record_created_at', models.DateTimeField(auto_now_add=True, verbose_name=b'record creation time')),
                 ('record_updated_at', models.DateTimeField(auto_now=True, verbose_name=b'record update time')),
@@ -21,7 +20,7 @@ class Migration(migrations.Migration):
                 ('description', models.TextField()),
                 ('thumbnail', models.URLField()),
                 ('published_at', models.DateTimeField(verbose_name=b'publish time')),
-                ('channel_id', models.TextField(unique=True)),
+                ('id', models.CharField(max_length=22, serialize=False, primary_key=True)),
                 ('uploads_playlist_id', models.TextField()),
             ],
             options={
@@ -31,7 +30,6 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Video',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('is_active', models.BooleanField(default=True)),
                 ('record_created_at', models.DateTimeField(auto_now_add=True, verbose_name=b'record creation time')),
                 ('record_updated_at', models.DateTimeField(auto_now=True, verbose_name=b'record update time')),
@@ -39,6 +37,7 @@ class Migration(migrations.Migration):
                 ('description', models.TextField()),
                 ('thumbnail', models.URLField()),
                 ('published_at', models.DateTimeField(verbose_name=b'publish time')),
+                ('id', models.CharField(max_length=11, serialize=False, primary_key=True)),
                 ('video_id', models.TextField(unique=True)),
                 ('channel', models.ForeignKey(related_name='videos', to='youtube.Channel')),
             ],

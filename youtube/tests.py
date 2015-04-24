@@ -74,10 +74,10 @@ class YoutubeModelTests(TestCase):
 
 class VideoMethodTests(TestCase):
     def test_create_video_from_web(self):
-        test_video = Video.create_from_web(test_video_id)
+        test_video = Video.create_from_youtube(test_video_id)
         test_video.save()
 
 class ChannelMethodTests(TestCase):
     def test_create_channel_from_web(self):
-        test_channel = Channel.create_from_web(test_channel_id)
+        test_channel = Channel.create_from_youtube(test_channel_id)
         test_channel.save()

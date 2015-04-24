@@ -15,16 +15,17 @@ class YoutubeModel(BaseModel):
             info['published_at'] = iso8601.parse_date(info['published_at'])
         return info
 
-    @classmethod
-    def create_from_info(cls, info):
-        info = cls.convert_timestamp_strings(info)
-        return cls(**info)
+    def update_info_from_youtube(self, info):
+        info = self.convert_timestamp_strings(info)
+        for key, value in info.iteritems():
+            setattr(self, key, value)
 
     class Meta:
         abstract = True
 
 
 class VideoModel(YoutubeModel):
+    id = models.CharField(primary_key=True, max_length=11)
     video_id = models.TextField(unique=True)
 
     class Meta:
@@ -32,24 +33,28 @@ class VideoModel(YoutubeModel):
 
 
 class Channel(YoutubeModel):
-    channel_id = models.TextField(unique=True)
+    id = models.CharField(primary_key=True, max_length=22)
     uploads_playlist_id = models.TextField()
 
     @classmethod
-    def create_from_web(cls, channel_id=None, username=None):
+    def create_from_youtube(cls, channel_id=None, username=None):
         if (channel_id is None and username is None) or (channel_id is not None and username is not None):
             raise AttributeError("Exactly one attribute is required.")
         if username is not None:
             channel_info = YoutubeAPIQuery.get_user(username)
         else:
             channel_info = YoutubeAPIQuery.get_channel(channel_id)
-        return cls.create_from_info(**channel_info)
+        channel = cls()
+        channel.update_info_from_youtube(channel_info)
+        return channel
 
 
 class Video(VideoModel):
     channel = models.ForeignKey(Channel, related_name='videos')
 
     @classmethod
-    def create_from_web(cls, video_id):
+    def create_from_youtube(cls, video_id):
         video_info = YoutubeAPIQuery.get_video(video_id)
-        return cls.create_from_info(**video_info)
+        video = cls()
+        video.update_info_from_youtube(video_info)
+        return video
