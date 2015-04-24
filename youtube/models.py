@@ -33,8 +33,8 @@ class VideoModel(YoutubeModel):
 
 
 class Channel(YoutubeModel):
-    id = models.CharField(primary_key=True, max_length=22)
-    uploads_playlist_id = models.TextField()
+    id = models.CharField(primary_key=True, max_length=24)
+    uploads_playlist_id = models.CharField(max_length=34)
 
     @classmethod
     def create_from_youtube(cls, channel_id=None, username=None):

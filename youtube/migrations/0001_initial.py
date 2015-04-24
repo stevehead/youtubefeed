@@ -20,8 +20,8 @@ class Migration(migrations.Migration):
                 ('description', models.TextField()),
                 ('thumbnail', models.URLField()),
                 ('published_at', models.DateTimeField(verbose_name=b'publish time')),
-                ('id', models.CharField(max_length=22, serialize=False, primary_key=True)),
-                ('uploads_playlist_id', models.TextField()),
+                ('id', models.CharField(max_length=24, serialize=False, primary_key=True)),
+                ('uploads_playlist_id', models.CharField(max_length=34)),
             ],
             options={
                 'abstract': False,
