@@ -109,6 +109,11 @@ STATIC_URL = '/static/'
 YOUTUBE_API_KEY = '<your application API key>'
 
 
+# If true, tests will do youtube api calls
+
+TEST_YOUTUBE_API_CALLS = True
+
+
 # Local settings import
 try:
     from local_settings import *
