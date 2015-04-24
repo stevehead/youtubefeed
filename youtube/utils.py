@@ -12,21 +12,21 @@ class YoutubeAPIQuery:
     api_key = settings.YOUTUBE_API_KEY
     api_base_url = 'https://www.googleapis.com/youtube/v3/'
 
-    channel_properties = ['channel_id', 'title', 'description', 'thumbnail', 'published_at', 'uploads_playlist_id']
+    channel_properties = ['id', 'title', 'description', 'thumbnail', 'published_at', 'uploads_playlist_id']
     channel_url_parts = ['contentDetails', 'snippet']
     channel_url_format = api_base_url + 'channels?part=' + ','.join(channel_url_parts) + '&id=%s&key=' + api_key
     user_url_format = api_base_url + 'channels?part=' + ','.join(channel_url_parts) + '&forUsername=%s&key=' + api_key
 
-    playlist_properties = ['playlist_id', 'title', 'description', 'thumbnail', 'published_at', 'channel_id', 'video_count']
+    playlist_properties = ['id', 'title', 'description', 'thumbnail', 'published_at', 'channel_id', 'video_count']
     playlist_url_parts = ['contentDetails', 'snippet']
     playlist_url_format = api_base_url + 'playlists?part=' + ','.join(channel_url_parts) + '&id=%s&key=' + api_key
     playlist_from_channel_url_format = api_base_url + 'playlists?part=' + ','.join(channel_url_parts) + '&channelId=%s&key=' + api_key
 
-    playlist_video_properties = ['video_id', 'title', 'description', 'thumbnail', 'published_at', 'channel_id', 'duration']
+    playlist_video_properties = ['id', 'title', 'description', 'thumbnail', 'published_at', 'channel_id', 'duration']
     playlist_video_url_parts = ['snippet']
     playlist_video_url_format = api_base_url + 'playlistItems?part=' + ','.join(playlist_video_url_parts) + '&playlistId=%s&key=' + api_key
 
-    video_properties = ['video_id', 'title', 'description', 'thumbnail', 'published_at', 'channel_id', 'duration']
+    video_properties = ['id', 'title', 'description', 'thumbnail', 'published_at', 'channel_id', 'duration']
     video_url_parts = ['contentDetails', 'snippet']
     video_url_format = api_base_url + 'videos?part=' + ','.join(video_url_parts) + '&id=%s&key=' + api_key
 
@@ -85,7 +85,7 @@ class YoutubeAPIQuery:
     def parse_channel_results(channel_item):
         try:
             channel = dict()
-            channel['channel_id'] = channel_item['id']
+            channel['id'] = channel_item['id']
             channel['title'] = channel_item['snippet']['title']
             channel['description'] = channel_item['snippet']['description']
             channel['thumbnail'] = channel_item['snippet']['thumbnails']['default']['url']
@@ -102,7 +102,7 @@ class YoutubeAPIQuery:
     def parse_playlist_results(playlist_item):
         try:
             playlist = dict()
-            playlist['playlist_id'] = playlist_item['id']
+            playlist['id'] = playlist_item['id']
             playlist['channel_id'] = playlist_item['snippet']['channelId']
             playlist['title'] = playlist_item['snippet']['title']
             playlist['description'] = playlist_item['snippet']['description']
@@ -120,7 +120,7 @@ class YoutubeAPIQuery:
     def parse_playlist_video_results(video_item):
         try:
             video = dict()
-            video['video_id'] = video_item['snippet']['resourceId']['videoId']
+            video['id'] = video_item['snippet']['resourceId']['videoId']
             video['channel_id'] = video_item['snippet']['channelId']
             video['title'] = video_item['snippet']['title']
             video['description'] = video_item['snippet']['description']
@@ -138,7 +138,7 @@ class YoutubeAPIQuery:
     def parse_video_results(video_item):
         try:
             video = dict()
-            video['video_id'] = video_item['id']
+            video['id'] = video_item['id']
             video['channel_id'] = video_item['snippet']['channelId']
             video['title'] = video_item['snippet']['title']
             video['description'] = video_item['snippet']['description']
