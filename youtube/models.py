@@ -30,7 +30,7 @@ class YoutubeModel(BaseModel):
 
     @staticmethod
     def convert_duration_string_to_seconds(duration):
-        regex_search = re.search('PT(\d)M(\d)S', duration)
+        regex_search = re.search(r'PT(\d)M(\d)S', duration)
         seconds = int(regex_search.group(1)) * 60
         seconds += int(regex_search.group(2))
         return seconds
@@ -77,11 +77,11 @@ class Video(VideoModel):
             Channel.objects.get(pk=self.channel_id)
         except ObjectDoesNotExist:
             Channel.create_from_youtube(channel_id=self.channel_id)
-        super(VideoModel, self).save(*args, **kwargs)
+        super(Video, self).save(*args, **kwargs)
 
     @classmethod
     def clean_info(cls, info):
-        info = VideoModel.clean_info(info)
+        info = super(Video, cls).clean_info(info)
         info['duration'] = cls.convert_duration_string_to_seconds(info['duration'])
         return info
 
