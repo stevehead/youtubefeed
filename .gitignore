@@ -122,3 +122,6 @@ crashlytics-build.properties
 
 # sqlite3 databases
 *.sqlite3
+
+# directory containing JSON dumps of a previous private application
+/datadump/
