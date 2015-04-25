@@ -49,3 +49,16 @@ def convert_iso8601_duration_to_seconds(duration):
         elif type == 'S':
             seconds += amount
     return int(seconds)
+
+
+def split_lists(the_list, wanted_parts=1):
+    all_lists = []
+    current_list = []
+    for i in the_list:
+        current_list.append(i)
+        if len(current_list) == wanted_parts:
+            all_lists.append(current_list)
+            current_list = []
+    if len(current_list) > 0:
+        all_lists.append(current_list)
+    return all_lists

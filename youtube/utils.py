@@ -1,7 +1,7 @@
 import json
 import urllib2
 from abc import ABCMeta, abstractmethod
-from common.utils import convert_iso8601_duration_to_seconds, convert_iso8601_to_datetime
+from common.utils import convert_iso8601_duration_to_seconds, convert_iso8601_to_datetime, split_lists
 from django.conf import settings
 
 DEFAULT_TIMESTAMP = convert_iso8601_to_datetime('2000-01-01T00:00:00.000Z')
@@ -62,14 +62,12 @@ class YoutubeAPIQuery:
 
     @classmethod
     def multi_query_youtube(cls, query, parse_method=None, limit=None):
-        if limit is not None:
-            limit = min(limit, 50)
         main_query = query + '&maxResults=50'
         all_items = []
-        pageToken = None
+        page_token = None
         while True:
-            if pageToken:
-                this_query = main_query + '&pageToken=' + pageToken
+            if page_token:
+                this_query = main_query + '&pageToken=' + page_token
             else:
                 this_query = main_query
             query_results = cls.query_youtube(query=this_query, requires_one_response=False)
@@ -79,7 +77,7 @@ class YoutubeAPIQuery:
                 else:
                     all_items.append(result)
             if 'nextPageToken' in query_results:
-                pageToken = query_results['nextPageToken']
+                page_token = query_results['nextPageToken']
             else:
                 break
             if limit is not None and len(all_items) >= limit:
@@ -169,7 +167,7 @@ class YoutubeAPIQuery:
     @classmethod
     def get_channel_playlists(cls, channel_id, *args, **kwargs):
         query = cls.playlist_from_channel_url_format % channel_id
-        return cls.multi_query_youtube(query, cls.parse_playlist_results, *args, **kwargs)
+        return cls.multi_query_youtube(query, parse_method=cls.parse_playlist_results, *args, **kwargs)
 
     @classmethod
     def get_channel_videos(cls, channel_id, *args, **kwargs):
@@ -206,7 +204,7 @@ class YoutubeAPIQuery:
     @classmethod
     def get_playlist_videos(cls, playlist_id, *args, **kwargs):
         query = cls.playlist_video_url_format % playlist_id
-        return cls.multi_query_youtube(query, cls.parse_playlist_video_results, *args, **kwargs)
+        return cls.multi_query_youtube(query, parse_method=cls.parse_playlist_video_results, *args, **kwargs)
 
     @classmethod
     def get_video(cls, video_id):
@@ -216,8 +214,12 @@ class YoutubeAPIQuery:
 
     @classmethod
     def get_videos(cls, *video_ids, **kwargs):
-        query = cls.video_url_format % ','.join(video_ids)
-        return cls.multi_query_youtube(query, cls.parse_video_results, **kwargs)
+        all_videos = []
+        video_sets = split_lists(video_ids, 50)
+        for video_set in video_sets:
+            query = cls.video_url_format % ','.join(video_set)
+            all_videos += cls.multi_query_youtube(query, parse_method=cls.parse_video_results, **kwargs)
+        return all_videos
 
     @classmethod
     def get_video_channel(cls, video_id):

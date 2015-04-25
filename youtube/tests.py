@@ -2,7 +2,7 @@ import unittest
 from django.conf import settings
 from django.test import TestCase
 
-from common.utils import convert_iso8601_duration_to_seconds
+from common.utils import convert_iso8601_duration_to_seconds, split_lists
 from .models import Video, Channel
 from .utils import YoutubeAPIQuery
 
@@ -77,6 +77,25 @@ class YoutubeAPIQueryTests(TestCase):
         results = YoutubeAPIQuery.multi_query_youtube(query=query, limit=limit)
         self.assertEqual(len(results), limit)
 
+    def test_multi_query_youtube_with_large_limit(self):
+        limit = 75
+        query = YoutubeAPIQuery.playlist_video_url_format % test_playlist_id
+        results = YoutubeAPIQuery.multi_query_youtube(query=query, limit=limit)
+        self.assertEqual(len(results), limit)
+
+    def test_multi_query_youtube_without_limit(self):
+        query = YoutubeAPIQuery.playlist_video_url_format % test_playlist_id
+        results = YoutubeAPIQuery.multi_query_youtube(query=query)
+        self.assertGreater(len(results), 50)
+
+    def test_multi_video_query(self):
+        limit = 75
+        videos_raw = YoutubeAPIQuery.get_channel_videos(test_channel_id, limit=limit)
+        self.assertEqual(len(videos_raw), limit)
+        video_ids_list = [video['id'] for video in videos_raw]
+        videos = YoutubeAPIQuery.get_videos(*video_ids_list)
+        self.assertEqual(len(videos), limit)
+
 
 class CommonUtilitiesTests(TestCase):
     def test_convert_iso8601_duration_to_seconds(self):
@@ -92,6 +111,21 @@ class CommonUtilitiesTests(TestCase):
         for test in tests:
             test_method_value = convert_iso8601_duration_to_seconds(test['string'])
             self.assertEqual(test_method_value, test['value'])
+
+    def test_split_lists(self):
+        test_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+        test_split = split_lists(test_list, 5)
+        self.assertEqual(len(test_split), 3)
+        self.assertEqual(len(test_split[0]), 5)
+        self.assertEqual(len(test_split[1]), 5)
+        self.assertEqual(len(test_split[2]), 3)
+        for i in [1, 2, 3, 4, 5]:
+            self.assertIn(i, test_split[0])
+        for i in [6, 7, 8, 9, 10]:
+            self.assertIn(i, test_split[1])
+        for i in [11, 12, 13]:
+            self.assertIn(i, test_split[2])
+
 
 
 class VideoMethodTests(TestCase):
