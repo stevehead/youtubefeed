@@ -38,6 +38,10 @@ class YoutubeModel(BaseModel):
 class VideoModel(YoutubeModel):
     id = models.CharField(primary_key=True, max_length=11)
 
+    @property
+    def url(self):
+        return "https://www.youtube.com/watch?v=%s" % self.pk
+
     class Meta:
         abstract = True
 
@@ -63,6 +67,9 @@ class Channel(YoutubeModel):
         channel_info = YoutubeAPIQuery.get_channel(self.pk)
         self.set_info_from_youtube(channel_info)
         self.save()
+
+    def get_latest_videos(self, *args, **kwargs):
+        return YoutubeAPIQuery.get_playlist_videos(self.uploads_playlist_id, *args, **kwargs)
 
 
 class Video(VideoModel):
