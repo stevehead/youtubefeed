@@ -1,3 +1,5 @@
+from datetime import timedelta
+from django.utils import timezone
 from django.db import models
 from common.models import BaseModel
 from youtube.models import Channel, Video, VideoModel
@@ -32,6 +34,9 @@ class ShowType(BaseModel):
             raise AttributeError("The current name color value is outside the allowed hexadecimal range")
         self.name_color = decimal_value
 
+    def __unicode__(self):
+        return self.name
+
 
 class Show(BaseModel):
     COMPLETED = 'C'
@@ -45,6 +50,21 @@ class Show(BaseModel):
     video_title_format = models.TextField(default='', blank=True)
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default=ONGOING)
     videos = models.ManyToManyField(Video)
+
+    @property
+    def channel_titles(self):
+        try:
+            return self._cache_info['channel_titles']
+        except KeyError:
+            self._cache_info['channel_titles'] = []
+            for video in self.videos.all().select_related('channel'):
+                channel_title = video.channel.title
+                if channel_title not in self._cache_info['channel_titles']:
+                    self._cache_info['channel_titles'].append(channel_title)
+            return self._cache_info['channel_titles']
+
+    def __unicode__(self):
+        return "%s: %s" % (','.join(self.channel_titles), self.name)
 
 
 class ShowViewing(BaseModel):
@@ -60,6 +80,9 @@ class ShowViewing(BaseModel):
     name = models.TextField(blank=False)
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default=PRIMARY)
 
+    def __unicode__(self):
+        return "%s : %s" % (self.show.name, self.name)
+
     class Meta:
         unique_together = ('show', 'name')
 
@@ -71,10 +94,26 @@ class VideoViewing(BaseModel):
     class Meta:
         unique_together = ('video', 'show_viewing')
 
+    def __unicode__(self):
+        if self.show_viewing:
+            return "%s : %s" % (self.show_viewing.name, self.video.name)
+        else:
+            return "Random Viewing : %s" % self.video.name
+
 
 class FeedChannel(BaseModel):
     channel = models.OneToOneField(Channel, primary_key=True)
 
+    def __unicode__(self):
+        return self.channel.title
+
 
 class FeedVideo(VideoModel):
     channel = models.ForeignKey(Channel, related_name='feed_videos')
+
+    @classmethod
+    def remove_old_videos(cls, days=7):
+        cls.objects.filter(published_at__lte=timezone.now()-timedelta(days=days)).delete()
+
+    def __unicode__(self):
+        return self.title
