@@ -53,7 +53,7 @@ class YoutubeAPIQuery:
             if len(json_response['items']) > 1:
                 raise YoutubeAPIQueryError("This request must contain exactly one item")
             elif len(json_response['items']) == 0:
-                raise YoutubeAPIQueryError("The request could not find any results.")
+                raise YoutubeAPINoResultsFound("The request could not find any results.")
             return json_response['items'][0]
         # Else return everything
         else:
@@ -220,4 +220,7 @@ class YoutubeAPIQuery:
 
 
 class YoutubeAPIQueryError(Exception):
+    pass
+
+class YoutubeAPINoResultsFound(Exception):
     pass
