@@ -1,4 +1,12 @@
-import re
+import re, iso8601, pytz
+from django.conf import settings
+
+CURRENT_TIMEZONE = pytz.timezone(settings.TIME_ZONE)
+
+
+def convert_iso8601_to_appropriate_datetime(iso8601_string):
+    return iso8601.parse_date(iso8601_string).astimezone(CURRENT_TIMEZONE)
+
 
 def convert_iso8601_duration_to_seconds(duration):
     duration = str(duration)

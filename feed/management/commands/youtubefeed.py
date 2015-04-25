@@ -13,7 +13,5 @@ class Command(BaseCommand):
 
             for video in this_videos:
                 if video['id'] not in current_video_ids:
-                    new_feed_video = FeedVideo()
-                    new_feed_video.set_info_from_youtube(video)
-                    new_feed_video.save()
+                    new_feed_video = FeedVideo.create_from_youtube(video['id'])
         FeedVideo.remove_old_videos(days=14)
