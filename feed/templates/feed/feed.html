@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+
+<table>
+    {% for video in feed_videos %}
+        <tr>
+            <td>{{ video.channel.title }}</td>
+            <td><a href="{{ video.url }}" target="_blank">{{ video.title }}</a></td>
+            <td><a href="{{ video.url }}" target="_blank"><img src="{{ video.thumbnail }}" /></a></td>
+            <td>{{ video.published_at }}</td>
+        </tr>
+    {% endfor %}
+</table>
+
+</body>
+</html>
