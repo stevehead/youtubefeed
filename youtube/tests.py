@@ -78,7 +78,7 @@ class YoutubeAPIQueryTests(TestCase):
         self.assertEqual(len(results), limit)
 
 
-class CoomonUtilitiesTests(TestCase):
+class CommonUtilitiesTests(TestCase):
     def test_convert_iso8601_duration_to_seconds(self):
         tests = [
             {'string': 'PT5M6S', 'value': 5 * 60 + 6},                      # MS
@@ -99,6 +99,7 @@ class VideoMethodTests(TestCase):
     def test_create_video_from_web(self):
         test_video = Video.create_from_youtube(test_video_id)
         test_video.save()
+
 
 class ChannelMethodTests(TestCase):
     @unittest.skipUnless(do_youtube_api_calls, "To speed up testing of non-api calls.")
