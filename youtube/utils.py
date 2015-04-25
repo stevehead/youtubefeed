@@ -171,9 +171,9 @@ class YoutubeAPIQuery:
         return cls.multi_query_youtube(query, cls.parse_playlist_results, *args, **kwargs)
 
     @classmethod
-    def get_channel_videos(cls, channel_id):
+    def get_channel_videos(cls, channel_id, *args, **kwargs):
         channel = cls.get_channel(channel_id)
-        return cls.get_playlist_videos(channel['uploads_playlist_id'])
+        return cls.get_playlist_videos(channel['uploads_playlist_id'], *args, **kwargs)
 
     @classmethod
     def get_user(cls, username):
@@ -182,14 +182,14 @@ class YoutubeAPIQuery:
         return cls.parse_channel_results(channel_item)
 
     @classmethod
-    def get_user_playlists(cls, username):
+    def get_user_playlists(cls, username, *args, **kwargs):
         channel = cls.get_user(username)
-        return cls.get_channel_playlists(channel['id'])
+        return cls.get_channel_playlists(channel['id'], *args, **kwargs)
 
     @classmethod
-    def get_user_videos(cls, username):
+    def get_user_videos(cls, username, *args, **kwargs):
         user = cls.get_user(username)
-        return cls.get_playlist_videos(user['uploads_playlist_id'])
+        return cls.get_playlist_videos(user['uploads_playlist_id'], *args, **kwargs)
 
     @classmethod
     def get_playlist(cls, playlist_id):
