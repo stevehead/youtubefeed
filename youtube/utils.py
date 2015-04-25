@@ -1,9 +1,10 @@
 import json
 import urllib2
 from abc import ABCMeta, abstractmethod
-from datetime import datetime
-
+from common.utils import convert_iso8601_duration_to_seconds, convert_iso8601_to_datetime
 from django.conf import settings
+
+DEFAULT_TIMESTAMP = convert_iso8601_to_datetime('2000-01-01T00:00:00.000Z')
 
 
 class YoutubeAPIQuery:
@@ -97,9 +98,9 @@ class YoutubeAPIQuery:
             channel['description'] = channel_item['snippet']['description']
             channel['thumbnail'] = channel_item['snippet']['thumbnails']['default']['url']
             try:
-                channel['published_at'] = channel_item['snippet']['publishedAt']
+                channel['published_at'] = convert_iso8601_to_datetime(channel_item['snippet']['publishedAt'])
             except KeyError:
-                channel['published_at'] = None
+                channel['published_at'] = DEFAULT_TIMESTAMP
             channel['uploads_playlist_id'] = channel_item['contentDetails']['relatedPlaylists']['uploads']
             return channel
         except Exception as e:
@@ -115,9 +116,9 @@ class YoutubeAPIQuery:
             playlist['description'] = playlist_item['snippet']['description']
             playlist['thumbnail'] = playlist_item['snippet']['thumbnails']['default']['url']
             try:
-                playlist['published_at'] = playlist_item['snippet']['publishedAt']
+                playlist['published_at'] = convert_iso8601_to_datetime(playlist_item['snippet']['publishedAt'])
             except KeyError:
-                playlist['published_at'] = None
+                playlist['published_at'] = DEFAULT_TIMESTAMP
             playlist['video_count'] = playlist_item['contentDetails']['itemCount']
             return playlist
         except Exception as e:
@@ -133,9 +134,9 @@ class YoutubeAPIQuery:
             video['description'] = video_item['snippet']['description']
             video['thumbnail'] = video_item['snippet']['thumbnails']['default']['url']
             try:
-                video['published_at'] = video_item['snippet']['publishedAt']
+                video['published_at'] = convert_iso8601_to_datetime(video_item['snippet']['publishedAt'])
             except KeyError:
-                video['published_at'] = None
+                video['published_at'] = DEFAULT_TIMESTAMP
             video['duration'] = None
             return video
         except Exception as e:
@@ -151,10 +152,10 @@ class YoutubeAPIQuery:
             video['description'] = video_item['snippet']['description']
             video['thumbnail'] = video_item['snippet']['thumbnails']['default']['url']
             try:
-                video['published_at'] = video_item['snippet']['publishedAt']
+                video['published_at'] = convert_iso8601_to_datetime(video_item['snippet']['publishedAt'])
             except KeyError:
-                video['published_at'] = None
-            video['duration'] = video_item['contentDetails']['duration']
+                video['published_at'] = DEFAULT_TIMESTAMP
+            video['duration'] = convert_iso8601_duration_to_seconds(video_item['contentDetails']['duration'])
             return video
         except Exception as e:
             raise YoutubeAPIQueryError("JSON parsing failed: %s" % e)

@@ -1,7 +1,7 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from common.models import BaseModel
-from common.utils import convert_iso8601_duration_to_seconds, convert_iso8601_to_appropriate_datetime
+from common.utils import convert_iso8601_duration_to_seconds, convert_iso8601_to_datetime
 from .utils import YoutubeAPIQuery
 
 
@@ -11,18 +11,7 @@ class YoutubeModel(BaseModel):
     thumbnail = models.URLField()
     published_at = models.DateTimeField('publish time')
 
-    default_timestamp = convert_iso8601_to_appropriate_datetime('2000-01-01T00:00:00.000Z')
-
-    @classmethod
-    def clean_info(cls, info):
-        if 'published_at' in info and info['published_at'] is not None:
-            info['published_at'] = convert_iso8601_to_appropriate_datetime(info['published_at'])
-        else:
-            info['published_at'] = cls.default_timestamp
-        return info
-
     def set_info_from_youtube(self, info):
-        info = self.clean_info(info)
         for key, value in info.iteritems():
             setattr(self, key, value)
 
@@ -93,9 +82,3 @@ class Video(VideoModel):
         except ObjectDoesNotExist:
             Channel.create_from_youtube(channel_id=self.channel_id)
         super(Video, self).save(*args, **kwargs)
-
-    @classmethod
-    def clean_info(cls, info):
-        info = super(Video, cls).clean_info(info)
-        info['duration'] = convert_iso8601_duration_to_seconds(info['duration'])
-        return info
