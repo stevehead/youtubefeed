@@ -57,8 +57,11 @@ class ShowViewing(BaseModel):
         (SECONDARY, 'Secondary'),
     )
     show = models.ForeignKey(Show, related_name='viewings')
-    name = models.TextField(unique=True, blank=False)
+    name = models.TextField(blank=False)
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default=PRIMARY)
+
+    class Meta:
+        unique_together = ('show', 'name')
 
 
 class VideoViewing(BaseModel):
