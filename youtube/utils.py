@@ -215,6 +215,11 @@ class YoutubeAPIQuery:
         return cls.parse_video_results(video_item)
 
     @classmethod
+    def get_videos(cls, *video_ids, **kwargs):
+        query = cls.video_url_format % ','.join(video_ids)
+        return cls.multi_query_youtube(query, cls.parse_video_results, **kwargs)
+
+    @classmethod
     def get_video_channel(cls, video_id):
         video = cls.get_video(video_id)
         return cls.get_channel(video['channel_id'])
