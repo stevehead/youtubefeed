@@ -1,6 +1,9 @@
+import re
+
 from datetime import timedelta
 from django.utils import timezone
 from django.db import models
+
 from common.models import BaseModel
 from youtube.models import Channel, Video, VideoModel
 
@@ -56,15 +59,38 @@ class Show(BaseModel):
         try:
             return self._cache_info['channel_titles']
         except KeyError:
-            self._cache_info['channel_titles'] = []
+            all_channels = []
             for video in self.videos.all().select_related('channel'):
                 channel_title = video.channel.title
-                if channel_title not in self._cache_info['channel_titles']:
-                    self._cache_info['channel_titles'].append(channel_title)
+                if channel_title not in all_channels:
+                    all_channels.append(channel_title)
+            self._cache_info['channel_titles'] = ' | '.join(all_channels)
             return self._cache_info['channel_titles']
 
+    @property
+    def video_title_format_regex(self):
+        try:
+            return self._cache_info['video_title_format_regex']
+        except KeyError:
+            if self.video_title_format:
+                regex_string = re.escape(self.video_title_format)
+                regex_string = regex_string.replace(r'\%\%', '__doublepercent__')
+                regex_string = regex_string.replace(r'\%n', '[0-9]+[a-zA-Z]*')
+                regex_string = regex_string.replace(r'\%t', '.+')
+                regex_string = regex_string.replace('__doublepercent__', r'\%')
+                self._cache_info['video_title_format_regex'] = re.compile(regex_string)
+            else:
+                self._cache_info['video_title_format_regex'] = None
+            return self._cache_info['video_title_format_regex']
+
+    def likely_has_video(self, video):
+        if self.video_title_format_regex and self.video_title_format_regex.match(video.title):
+            return True
+        else:
+            return False
+
     def __unicode__(self):
-        return "%s: %s" % (','.join(self.channel_titles), self.name)
+        return "%s: %s" % (self.channel_titles, self.name)
 
 
 class ShowViewing(BaseModel):
