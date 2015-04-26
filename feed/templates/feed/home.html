@@ -1,0 +1,38 @@
+{% extends "feed/base.html" %}
+
+{% block content %}
+<h2>Unwatched Episodes</h2>
+<table class="u-full-width">
+    <thead>
+        <tr>
+            <th>Video</th>
+            <th colspan="2">Publish Time</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for video in videos_to_watch %}
+            <tr>
+                <td>
+                    {% if video.show_viewing.status == "S" %}
+                        <strong style="background-color:orange;color:white;">NP</strong>
+                    {% endif %}
+                    {{ video.channel.title }} -
+                    <span style="color:{{ video.show_viewing.show.show_type.name_hex_color }}">
+                        <strong>{{ video.show_viewing.show.name }}</strong>
+                    </span>
+                    <br />
+                    {{ video.title }}
+                </td>
+                <td>{{ video.published_at }}</td>
+                <td><input class="button-primary" type="submit" value="Watched"></td>
+            </tr>
+        {% endfor %}
+        <tr>
+            <td colspan="3">
+                Total Primary Episodes: {{ total_primary_videos }},
+                Total Time: {{ total_primary_duration }}
+            </td>
+        </tr>
+    </tbody>
+</table>
+{% endblock %}
