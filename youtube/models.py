@@ -50,6 +50,10 @@ class Channel(YoutubeModel):
     id = models.CharField(primary_key=True, max_length=24)
     uploads_playlist_id = models.CharField(max_length=34)
 
+    @property
+    def url(self):
+        return "https://www.youtube.com/channel/%s" % self.pk
+
     @classmethod
     def create_from_youtube(cls, channel_id=None, username=None):
         if (channel_id is None and username is None) or (channel_id is not None and username is not None):
