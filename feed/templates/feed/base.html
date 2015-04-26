@@ -10,8 +10,15 @@
 </head>
 <body>
 
+<header>
+    <div id="page-logo">YOUTUBEFEED</div>
+    <div><a href="{% url "feed:feed" %}">Feed</a></div>
+</header>
+
+<div id="content">
 {% block content %}
 {% endblock %}
+</div>
 
 </body>
 </html>

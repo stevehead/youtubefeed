@@ -1,9 +1,61 @@
-body
+header
 {
-    padding: 10px;
+    color: #E1E1E1;
+    background-color: #000000;
+}
+
+header > div
+{
+    height: 60px;
+    line-height: 60px;
+    display: inline-block;
+    padding: 0 20px;
+}
+
+header > div a
+{
+    text-decoration: none;
+    color: inherit;
+}
+
+#page-logo
+{
+    font-size: 1.2em;
+}
+
+#content
+{
+    padding: 10px 40px;
+}
+
+#yt-feed a
+{
+    color: #800000;
+}
+
+#yt-feed .button-primary
+{
+    background-color: #800000;
+    border-color: #800000;
 }
 
 .yt-small-thumb
 {
     height: 40px;
+}
+
+#yt-feed .yt-likely-show-video a
+{
+    color: #1EAEDB;
+}
+
+#yt-feed .yt-likely-show-video .button-primary
+{
+    background-color: #1EAEDB;
+    border-color: #1EAEDB;
+}
+
+.yt-feed-time-section td
+{
+    border: none;
 }

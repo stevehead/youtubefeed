@@ -1,24 +1,53 @@
 {% extends "feed/base.html" %}
 
 {% block content %}
-<table class="u-full-width">
+<h2>Youtube Feed</h2>
+<table id="yt-feed" class="u-full-width">
     <thead>
         <tr>
             <th>Channel</th>
             <th colspan="2">Video</th>
-            <th>Publish Time</th>
+            <th colspan="3">Publish Time</th>
         </tr>
     </thead>
     <tbody>
-        {% for video in feed_videos %}
-            <tr>
-                <td>
-                    <img class="yt-small-thumb" src="{{ video.channel.thumbnail }}">
-                </td>
-                <td><a href="{{ video.url }}" target="_blank"><img class="yt-small-thumb" src="{{ video.thumbnail }}"></a></td>
-                <td><a href="{{ video.url }}" target="_blank">{{ video.title }}</a></td>
-                <td>{{ video.published_at }}</td>
-            </tr>
+        {% for video_set in video_sets_by_publish_time %}
+            {% if video_set.videos|length %}
+                <tr class="yt-feed-time-section">
+                    {% if forloop.counter > 1 %}
+                        <td colspan="6" style="border-top: 2px solid black;">
+                    {% else %}
+                        <td colspan="6">
+                    {% endif %}
+                        <strong>Uploaded Within {{ video_set.display }}</strong>
+                    </td>
+                </tr>
+                {% for video in video_set.videos %}
+                    {% if video.likely_show %}
+                        <tr class="yt-likely-show-video">
+                    {% else %}
+                        <tr>
+                    {% endif %}
+                        <td><a href="{{ video.channel.url }}" target="_blank"><img class="yt-small-thumb" src="{{ video.channel.thumbnail }}" title="{{ video.channel.title }}" alt="{{ video.channel.title }}"></a></td>
+                        <td><a href="{{ video.url }}" target="_blank"><img class="yt-small-thumb" src="{{ video.thumbnail }}" title="{{ video.title }}" alt="{{ video.title }}"></a></td>
+                        <td><a href="{{ video.url }}" target="_blank">{{ video.title }}</a></td>
+                        <td>{{ video.published_at }}</td>
+                        <td>
+                            <select class="u-full-width">
+                                <option>Select Show</option>
+                                {% for show in shows %}
+                                    {% if video.likely_show == show %}
+                                        <option selected="selected">{{ show.name }}</option>
+                                    {% else %}
+                                        <option>{{ show.name }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td><input class="button-primary" type="submit" value="Add"></td>
+                    </tr>
+                {% endfor %}
+            {% endif %}
         {% endfor %}
     </tbody>
 </table>
