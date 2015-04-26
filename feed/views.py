@@ -1,8 +1,47 @@
+from operator import attrgetter
+
+from django import db
 from datetime import timedelta
 from django.utils import timezone
 from django.shortcuts import render
 
-from .models import Show, FeedVideo
+from .models import Show, ShowViewing, FeedVideo
+
+
+def home(request):
+    all_active_show_viewings = ShowViewing.objects.filter(is_active=True).exclude(status=ShowViewing.COMPLETED)\
+        .select_related('show').prefetch_related('video_viewings', 'show__videos', 'show__show_type', 'show__videos__channel')
+    primary_videos_to_watch = []
+    secondary_videos_to_watch = []
+    total_primary_duration = 0
+    for show_viewing in all_active_show_viewings:
+        watched_videos = [video_viewing.video_id for video_viewing in show_viewing.video_viewings.all()]
+        all_videos = sorted(show_viewing.show.videos.all(), key=attrgetter('published_at'))
+        unwatched_videos = []
+        for video in all_videos:
+            if video.pk not in watched_videos:
+                unwatched_videos.append(video)
+        if show_viewing.status == ShowViewing.SECONDARY:
+            unwatched_videos = unwatched_videos[:1]
+        for video in unwatched_videos:
+            video.show_viewing = show_viewing
+            if show_viewing.status == ShowViewing.PRIMARY:
+                primary_videos_to_watch.append(video)
+                total_primary_duration += video.duration
+            else:
+                secondary_videos_to_watch.append(video)
+
+    primary_videos_to_watch = sorted(primary_videos_to_watch, key=attrgetter('published_at'))
+    secondary_videos_to_watch = sorted(secondary_videos_to_watch, key=attrgetter('published_at'))
+    videos_to_watch = primary_videos_to_watch + secondary_videos_to_watch
+
+    context = {
+        'videos_to_watch': videos_to_watch,
+        'total_primary_videos': len(primary_videos_to_watch),
+        'total_primary_duration': timedelta(seconds=total_primary_duration)
+    }
+
+    return render(request, 'feed/home.html', context)
 
 
 def feed(request):
@@ -28,6 +67,7 @@ def feed(request):
         {'display': '5 days ago', 'videos': [],},
         {'display': '6 days ago', 'videos': [],},
         {'display': '7 days ago', 'videos': [],},
+        {'display': 'more than 7 days ago', 'videos': []}
     ]
 
     for video in feed_videos:
@@ -65,6 +105,8 @@ def feed(request):
             video_sets_by_publish_time_raw[12]['videos'].append(video)
         elif current_time - video.published_at < timedelta(days=7):
             video_sets_by_publish_time_raw[13]['videos'].append(video)
+        else:
+            video_sets_by_publish_time_raw[14]['videos'].append(video)
 
     video_sets_by_publish_time = []
     for video_set in video_sets_by_publish_time_raw:
