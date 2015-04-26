@@ -1,21 +1,25 @@
-<!DOCTYPE html>
-<html>
-<head lang="en">
-    <meta charset="UTF-8">
-    <title></title>
-</head>
-<body>
+{% extends "feed/base.html" %}
 
-<table>
-    {% for video in feed_videos %}
+{% block content %}
+<table class="u-full-width">
+    <thead>
         <tr>
-            <td>{{ video.channel.title }}</td>
-            <td><a href="{{ video.url }}" target="_blank">{{ video.title }}</a></td>
-            <td><a href="{{ video.url }}" target="_blank"><img src="{{ video.thumbnail }}" /></a></td>
-            <td>{{ video.published_at }}</td>
+            <th>Channel</th>
+            <th colspan="2">Video</th>
+            <th>Publish Time</th>
         </tr>
-    {% endfor %}
+    </thead>
+    <tbody>
+        {% for video in feed_videos %}
+            <tr>
+                <td>
+                    <img class="yt-small-thumb" src="{{ video.channel.thumbnail }}">
+                </td>
+                <td><a href="{{ video.url }}" target="_blank"><img class="yt-small-thumb" src="{{ video.thumbnail }}"></a></td>
+                <td><a href="{{ video.url }}" target="_blank">{{ video.title }}</a></td>
+                <td>{{ video.published_at }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
 </table>
-
-</body>
-</html>
+{% endblock %}
