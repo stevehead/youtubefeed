@@ -15,6 +15,18 @@
     <div><a href="{% url "feed:feed" %}">Feed</a></div>
 </header>
 
+<div id="form-messages" class="container">
+    {% if errors %}
+        <div class="form-error-messages">
+            <ul>
+                {% for error in errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+</div>
+
 <div id="content">
 {% block content %}
 {% endblock %}

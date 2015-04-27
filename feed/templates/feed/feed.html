@@ -33,18 +33,24 @@
                         <td><a href="{{ video.url }}" target="_blank">{{ video.title }}</a></td>
                         <td>{{ video.published_at }}</td>
                         <td>
-                            <select class="u-full-width">
-                                <option>Select Show</option>
+                            <select class="u-full-width" form="form-{{ video.pk }}" name="show_id">
+                                <option value="">Select Show</option>
                                 {% for show in shows %}
                                     {% if video.likely_show == show %}
-                                        <option selected="selected">{{ show.name }}</option>
+                                        <option selected="selected" value="{{ show.pk }}">{{ show.name }}</option>
                                     {% else %}
-                                        <option>{{ show.name }}</option>
+                                        <option value="{{ show.pk }}">{{ show.name }}</option>
                                     {% endif %}
                                 {% endfor %}
                             </select>
                         </td>
-                        <td><input class="button-primary" type="submit" value="Add"></td>
+                        <td>
+                            <form id="form-{{ video.pk }}" action="{% url "feed:feed" %}" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="video_id" value="{{ video.pk }}">
+                                <input class="button-primary" type="submit" value="Add">
+                            </form>
+                        </td>
                     </tr>
                 {% endfor %}
             {% endif %}
