@@ -227,8 +227,13 @@ class YoutubeAPIQuery:
         return cls.get_channel(video['channel_id'])
 
 
-class YoutubeAPIQueryError(Exception):
+class YoutubeAPIError(Exception):
     pass
 
-class YoutubeAPINoResultsFound(Exception):
+
+class YoutubeAPIQueryError(YoutubeAPIError):
+    pass
+
+
+class YoutubeAPINoResultsFound(YoutubeAPIError):
     pass
