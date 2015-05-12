@@ -1,7 +1,7 @@
 from datetime import timedelta
 from django.utils import timezone
-from django.core.management import BaseCommand, CommandError
-from feed.models import FeedChannel, FeedVideo
+from django.core.management import BaseCommand
+from feed.models import FeedChannel, FeedVideo, Show
 from youtube.utils import YoutubeAPIQuery
 
 MAX_VIDEOS_PER_CHANNEL = 50
@@ -14,6 +14,10 @@ class Command(BaseCommand):
         self.stdout.write("Youtubefeed has begun.")
         current_time = timezone.now()
         feed_channels = FeedChannel.objects.all().select_related('channel')
+        ignore_videos = []
+        shows = Show.objects.all().prefetch_related('videos')
+        for show in shows:
+            ignore_videos += [video.pk for video in show.videos.all()]
         raw_videos_to_add = []
         for feed_channel in feed_channels:
             channel = feed_channel.channel
@@ -21,6 +25,8 @@ class Command(BaseCommand):
             self.stdout.write("Channel \"%s\" videos pre-loaded." % channel.title)
         all_videos_ids_to_add = []
         for video in raw_videos_to_add:
+            if video['id'] in ignore_videos:
+                continue
             if current_time - video['published_at'] < timedelta(days=MAX_LIFE_DAYS+2):
                 all_videos_ids_to_add.append(video['id'])
         all_videos_ids_to_add = [video['id'] for video in raw_videos_to_add]
