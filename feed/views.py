@@ -1,10 +1,12 @@
 from operator import attrgetter
 
-from django import db
 from datetime import timedelta
+from django.conf import settings
+from django.core.validators import ValidationError
 from django.utils import timezone
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
+from youtube.models import Video
 from .models import Show, ShowViewing, FeedVideo
 
 
@@ -45,6 +47,57 @@ def home(request):
 
 
 def feed(request):
+    errors = []
+
+    # Feed form method.
+    if request.method == 'POST':
+        try:
+            # Get IDs from form data.
+            show_id = request.POST.get('show_id')
+            video_id = request.POST.get('video_id')
+
+            # The IDs are required.
+            if not show_id:
+                raise ValidationError("The show ID is required.", code='missing_field')
+            if not video_id:
+                raise ValidationError("The video ID is required.", code='missing_field')
+
+            # Make sure the show exists in the database.
+            try:
+                show = Show.objects.get(pk=show_id)
+            except Show.DoesNotExist:
+                raise ValidationError("The show is not found in the database.", code='missing_db_object')
+
+            # Make sure the show doesn't already have the video.
+            if show.videos.filter(pk=video_id).count() > 0:
+                raise ValidationError("The show already has the video.", code='duplicate_entry')
+
+            # Grab the video from the DB or create it.
+            try:
+                video = Video.objects.get(pk=video_id)
+            except Video.DoesNotExist:
+                try:
+                    video = Video.create_from_youtube(video_id)
+                except Video.YoutubeQueryError:
+                    raise ValidationError("The video could not be pulled from Youtube. Make sure it exists on Youtube.")
+
+            # Add the video to the show.
+            show.videos.add(video)
+
+            # Delete the video from the feed.
+            FeedVideo.objects.filter(pk=video_id).delete()
+
+            # Redirect to self.
+            redirect('feed:feed')
+        except ValidationError as e:
+            errors.append(e.message)
+        except Exception as e:
+            if settings.DEBUG:
+                raise e
+            else:
+                errors.append("Unknown error.")
+
+    # Display logic begins here.
     current_time = timezone.now()
     current_ongoing_shows = Show.objects.filter(is_active=True).filter(status=Show.ONGOING).prefetch_related('videos')
     current_ongoing_show_video_ids = []
@@ -114,6 +167,7 @@ def feed(request):
             video_sets_by_publish_time.append(video_set)
 
     context = {
+        'errors': errors,
         'video_sets_by_publish_time': video_sets_by_publish_time,
         'shows': current_ongoing_shows
     }
